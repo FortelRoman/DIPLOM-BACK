@@ -1,58 +1,52 @@
 from flask import Flask, request
-from flask_restful import Api, Resource, reqparse
+from flask_restful import Api, Resource
 from flask_cors import CORS
-import pandas as pd
 from parse import devbyParse
-from mongo import addToDataBase
-import json
+from mongo import addItem, getList, deleteItem, getItem
+from datetime import date
 
-# pip install flask flask_restful flask_cors pymongo
-# pip install pymongo[srv]
+# pip install flask flask_restful flask_cors pymongo selenium
 
-app = Flask(__name__)
-CORS(app)
-api = Api()
-
-courses = {
-    1: {"name": "Python", "videos": 15},
-    2: {"name": "Java", "videos": 10}
-}
-
-parser = reqparse.RequestParser()
-parser.add_argument("name", type=str)
-parser.add_argument("videos", type=int)
-
-
-class Main(Resource):
+class DevByList(Resource):
     def get(self):
-        data = devbyParse()
-        addToDataBase(data)
-        return data
-        # if course_id == 0:
-        #     return parse()
-        # else:
-        #     return courses[course_id]
+        cursor = getList()
+        data = [record for record in cursor]
 
-    # def delete(self, course_id):
-    #     del courses[course_id]
-    #     return courses
-    #
+        arr = []
+
+        for item in data:
+            print(len(item['vacancies']))
+            arr.append({
+                '_id': item['_id'],
+                'count': len(item['vacancies']),
+                'date': item['date'],
+            })
+
+        return arr
+
     def post(self):
-        # file = request.json.get('test')
-        # file = request.data
-        file = request.files['file']
-        print(file)
-        # current_data = pd.read_json(record)
-        # print(current_data)
-        return 'success'
-
-    # def put(self, course_id):
-    #     courses[course_id] = parser.parse_args()
-    #     return courses
+        addItem(request.json)
 
 
-api.add_resource(Main, "/api/dev-by")
-api.init_app(app)
+class DevBy(Resource):
+    def get(self, id):
+        return getItem(id)
+
+    def delete(self, id):
+        deleteItem(id)
+
+
+class DevByParse(Resource):
+    def get(self):
+        return {'date': str(date.today()), 'vacancies': devbyParse()}
+
 
 if __name__ == "__main__":
+    app = Flask(__name__)
+    CORS(app)
+    api = Api()
+    api.add_resource(DevByList, "/api/dev-by")
+    api.add_resource(DevByParse, "/api/dev-by/parse")
+    api.add_resource(DevBy, "/api/dev-by/<id>")
+    api.init_app(app)
     app.run(debug=True, port=4000)
