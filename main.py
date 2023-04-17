@@ -20,12 +20,14 @@ class DevByList(Resource):
                 '_id': item['_id'],
                 'count': len(item['vacancies']),
                 'date': item['date'],
+                'resource': item['resource'],
             })
+        arr.reverse()
 
         return arr
 
     def post(self):
-        addItem(request.json)
+        addItem(request.json['date'], request.json['file'])
 
 
 class DevBy(Resource):

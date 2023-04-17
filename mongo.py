@@ -6,12 +6,21 @@ cluster = MongoClient('mongodb+srv://fortelra19:fortelra19@devby.4yo2tlq.mongodb
 db = cluster['DB_DEVBY']
 collection = db['COLLECTION_DEVBY']
 
-def addItem(data):
-    collection.insert_one({
+def addItem(addDate, data):
+    if (addDate.count):
+        collection.insert_one({
         '_id': str(uuid.uuid4()),
-        'date': str(date.today()),
+        'date': addDate,
         'vacancies': data,
-    })
+        'resource': 'devby.io',
+        })
+    else:
+        collection.insert_one({
+            '_id': str(uuid.uuid4()),
+            'date': str(date.today()),
+            'vacancies': data,
+            'resource': 'devby.io',
+        })
 
 
 def getList():
@@ -21,5 +30,5 @@ def deleteItem(id):
     collection.delete_one({'_id': id})
 
 def getItem(id):
-    return collection.find_one({'_id': id})['vacancies']
+    return collection.find_one({'_id': id})
 
