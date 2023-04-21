@@ -15,10 +15,10 @@ class DevByList(Resource):
         arr = []
 
         for item in data:
-            print(len(item['vacancies']))
+            print(len(item['records']))
             arr.append({
                 '_id': item['_id'],
-                'count': len(item['vacancies']),
+                'records': len(item['records']),
                 'date': item['date'],
                 'resource': item['resource'],
             })
@@ -40,7 +40,7 @@ class DevBy(Resource):
 
 class DevByParse(Resource):
     def get(self):
-        return {'date': str(date.today()), 'vacancies': devbyParse()}
+        return {'date': str(date.today()), 'records': devbyParse()}
 
 
 if __name__ == "__main__":

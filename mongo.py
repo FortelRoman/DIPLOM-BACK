@@ -11,14 +11,14 @@ def addItem(addDate, data):
         collection.insert_one({
         '_id': str(uuid.uuid4()),
         'date': addDate,
-        'vacancies': data,
+        'records': data,
         'resource': 'devby.io',
         })
     else:
         collection.insert_one({
             '_id': str(uuid.uuid4()),
             'date': str(date.today()),
-            'vacancies': data,
+            'records': data,
             'resource': 'devby.io',
         })
 
