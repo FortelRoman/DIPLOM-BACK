@@ -48,8 +48,8 @@ def devbyParse():
 
     nextVacancy = "Вакансия " + vacancies[0].text
 
-    # for index in range(len(vacancies)):
-    for index in range(3):
+    for index in range(len(vacancies)):
+    # for index in range(3):
 
         vacancies[index].click()
 
