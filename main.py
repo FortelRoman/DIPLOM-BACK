@@ -1,6 +1,6 @@
 from flask_restful import Api, Resource
 from parse import devbyParse
-from mongo import addItem, getList, deleteItem, getItem, findUserByUserName, addUser
+from mongo import addItem, getList, deleteItem, getItem, findUserByUserName, addUser, getAllUsers, deleteUserDB, updateUserRoleDB
 from datetime import date
 import hashlib
 import datetime
@@ -22,11 +22,12 @@ api.init_app(app)
 @app.route("/api/auth/register", methods=["POST"])
 def register():
     new_user = request.get_json()
-    new_user["password"] = hashlib.sha256(new_user["password"].encode("utf-8")).hexdigest()
-    new_user["isAdmin"] = False
+    username = new_user["username"]
+    password = hashlib.sha256(new_user["password"].encode("utf-8")).hexdigest()
+    role = 'ANALYST'
     doc = findUserByUserName(new_user["username"])
     if not doc:
-        addUser(new_user)
+        addUser(username, password, role)
         return jsonify({'msg': 'User created successfully'}), 201
     else:
         return jsonify({'msg': 'Username already exists'}), 409
@@ -99,6 +100,37 @@ def deleteResource(id):
 def parseResource():
     return {'date': str(date.today()), 'records': devbyParse()}
 
+@app.route("/api/users", methods=["GET"])
+@jwt_required(fresh=False)
+def getUsers():
+    cursor = getAllUsers()
+    data = [record for record in cursor]
+
+    arr = []
+
+    for item in data:
+        arr.append({
+            '_id': item['_id'],
+            'username': item['username'],
+            'role': item['role'],
+        })
+    arr.reverse()
+
+    return arr
+
+@app.route("/api/users/<id>", methods=["DELETE"])
+@jwt_required(fresh=False)
+def deleteUser(id):
+    if deleteUserDB(id) > 0:
+        return jsonify({'msg': 'success'}), 200
+    return jsonify({'msg': 'Error'}), 400
+
+@app.route("/api/users/<id>", methods=["PUT"])
+@jwt_required(fresh=False)
+def updateUserRole(id):
+    if updateUserRoleDB(id, request.json['role']):
+        return jsonify({'msg': 'success'}), 200
+    return jsonify({'msg': 'Error'}), 400
 
 if __name__ == "__main__":
     app.run(debug=True, port=4000)

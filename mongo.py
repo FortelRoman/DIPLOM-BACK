@@ -12,8 +12,13 @@ def findUserByUserName(username):
     return usersCollection.find_one({"username": username})
 
 
-def addUser(newUser):
-    usersCollection.insert_one(newUser)
+def addUser(username, password, role):
+    usersCollection.insert_one({
+        '_id': str(uuid.uuid4()),
+        'username': username,
+        'password': password,
+        'role': role,
+    })
 
 
 def addItem(addDate, data):
@@ -43,3 +48,16 @@ def deleteItem(id):
 
 def getItem(id):
     return collection.find_one({'_id': id})
+
+
+def getAllUsers():
+    return usersCollection.find()
+
+
+def deleteUserDB(id):
+    return usersCollection.delete_one({'_id': id}).deleted_count
+
+
+def updateUserRoleDB(id, role):
+    return usersCollection.update_one({'_id': id},
+                               {"$set": {"role": role}}).modified_count
