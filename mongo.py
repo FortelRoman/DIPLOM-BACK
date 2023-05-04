@@ -8,14 +8,15 @@ collection = db['COLLECTION_DEVBY']
 usersCollection = db['COLLECTION_USERS']
 
 
-def findUserByUserName(username):
-    return usersCollection.find_one({"username": username})
+def findUserByLogin(login):
+    return usersCollection.find_one({"login": login})
 
 
-def addUser(username, password, role):
+def addUser(username, login,  password, role):
     usersCollection.insert_one({
         '_id': str(uuid.uuid4()),
         'username': username,
+        'login': login,
         'password': password,
         'role': role,
     })
