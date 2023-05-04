@@ -23,19 +23,18 @@ def addUser(username, password, role):
 
 def addItem(addDate, data):
     if (addDate.count):
-        collection.insert_one({
+        return collection.insert_one({
             '_id': str(uuid.uuid4()),
             'date': addDate,
             'records': data,
             'resource': 'devby.io',
-        })
-    else:
-        collection.insert_one({
-            '_id': str(uuid.uuid4()),
-            'date': str(date.today()),
-            'records': data,
-            'resource': 'devby.io',
-        })
+        }).inserted_id
+    return collection.insert_one({
+        '_id': str(uuid.uuid4()),
+        'date': str(date.today()),
+        'records': data,
+        'resource': 'devby.io',
+    }).inserted_id
 
 
 def getList():
@@ -43,7 +42,7 @@ def getList():
 
 
 def deleteItem(id):
-    collection.delete_one({'_id': id})
+    return collection.delete_one({'_id': id}).deleted_count
 
 
 def getItem(id):
