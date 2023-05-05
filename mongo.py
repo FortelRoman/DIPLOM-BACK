@@ -8,9 +8,11 @@ collection = db['COLLECTION_DEVBY']
 usersCollection = db['COLLECTION_USERS']
 
 
+def findUserById(id):
+    return usersCollection.find_one({"_id": id})
+
 def findUserByLogin(login):
     return usersCollection.find_one({"login": login})
-
 
 def addUser(username, login,  password, role):
     usersCollection.insert_one({
@@ -61,3 +63,11 @@ def deleteUserDB(id):
 def updateUserRoleDB(id, role):
     return usersCollection.update_one({'_id': id},
                                {"$set": {"role": role}}).modified_count
+
+def updateUserName(id, username):
+    return usersCollection.update_one({'_id': id},
+                               {"$set": {"username": username}}).modified_count
+
+def updateUserLogin(id, login):
+    return usersCollection.update_one({'_id': id},
+                               {"$set": {"login": login}}).modified_count

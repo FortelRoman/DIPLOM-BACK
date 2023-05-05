@@ -1,28 +1,28 @@
 from flask_restful import Api, Resource
 from parse import devbyParse
-from mongo import addItem, getList, deleteItem, getItem, findUserByLogin, addUser, getAllUsers, deleteUserDB, updateUserRoleDB
+from mongo import addItem, getList, deleteItem, getItem, findUserById, findUserByLogin, addUser, getAllUsers, deleteUserDB, updateUserRoleDB, updateUserName, updateUserLogin
 from datetime import date
 import hashlib
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
 from flask import Flask, request, jsonify
-from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity, get_jwt, unset_jwt_cookies, set_access_cookies
+from flask_jwt_extended import  JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity, get_jwt, unset_jwt_cookies, set_access_cookies
 from pymongo import MongoClient
 from flask_cors import CORS, cross_origin
 
 # pip install flask flask_restful flask_cors pymongo selenium
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+CORS(app, supports_credentials=True, methods=['GET', 'PUT', 'POST'])
 app.config["JWT_COOKIE_SECURE"] = False
 app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
 app.config['JWT_SECRET_KEY'] = 'Your_Secret_Key'
+app.config['JWT_COOKIE_CSRF_PROTECT'] = False
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)
 api = Api()
 api.init_app(app)
 jwt = JWTManager(app)
-
 @app.after_request
 def refresh_expiring_jwts(response):
     try:
@@ -60,7 +60,7 @@ def login():
         encrpted_password = hashlib.sha256(login_details['password'].encode("utf-8")).hexdigest()
         if encrpted_password == user_from_db['password']:
             response = jsonify({"msg": "login successful"})
-            access_token = create_access_token(identity={'login': user_from_db['login'], 'role': user_from_db['role']})
+            access_token = create_access_token(identity={'id': user_from_db['_id'], 'login': user_from_db['login'], 'role': user_from_db['role']})
             set_access_cookies(response, access_token)
             return response, 200
 
@@ -76,15 +76,35 @@ def logout():
 @jwt_required()
 def profile():
     current_user = get_jwt_identity()
-    user_from_db = findUserByLogin(current_user['login'])
+    user_from_db = findUserById(current_user['id'])
     if user_from_db:
         del user_from_db['_id'], user_from_db['password']
         return jsonify({'profile': user_from_db}), 200
     else:
         return jsonify({'msg': 'Profile not found'}), 404
 
+@app.route("/api/profile", methods=["PUT"])
+@jwt_required()
+def updateProfile():
+    current_user = get_jwt_identity()
+    params = request.get_json()
+    user_from_db = findUserById(current_user['id'])
+
+    if user_from_db:
+        if 'username' in params:
+            updateUserName(current_user['id'], params['username'])
+        if 'login' in params:
+            doc = findUserByLogin(params["login"])
+            if not doc:
+                updateUserLogin(current_user['id'], params['login'])
+                return jsonify({'msg': 'success'}), 201
+            else:
+                return jsonify({'msg': 'Пользователь с таким логином уже существует'}), 409
+    else:
+        return jsonify({'msg': 'Profile not found'}), 404
+
 @app.route("/api/dev-by", methods=["GET"])
-@jwt_required(fresh=False)
+@jwt_required()
 def getResources():
     # cursor = getList()
     # data = [record for record in cursor]
@@ -106,7 +126,7 @@ def getResources():
     return jsonify([record for record in records])
 
 @app.route("/api/dev-by", methods=["POST"])
-@jwt_required(fresh=False)
+@jwt_required()
 def addResource():
     user_role = get_jwt_identity()['role']
     if user_role == 'ADMIN' or user_role == 'ANALYST':
@@ -116,12 +136,12 @@ def addResource():
     return jsonify({'msg': 'Method not allowed'}), 403
 
 @app.route("/api/dev-by/<id>", methods=["GET"])
-@jwt_required(fresh=False)
+@jwt_required()
 def getResource(id):
     return getItem(id), 200
 
 @app.route("/api/dev-by/<id>", methods=["DELETE"])
-@jwt_required(fresh=False)
+@jwt_required()
 def deleteResource(id):
     user_role = get_jwt_identity()['role']
     if user_role == 'ADMIN' or user_role == 'ANALYST':
@@ -132,7 +152,7 @@ def deleteResource(id):
 
 
 @app.route("/api/dev-by/parse", methods=["GET"])
-@jwt_required(fresh=False)
+@jwt_required()
 def parseResource():
     user_role = get_jwt_identity()['role']
     if user_role == 'ADMIN' or user_role == 'ANALYST':
@@ -140,7 +160,7 @@ def parseResource():
     return jsonify({'msg': 'Method not allowed'}), 403
 
 @app.route("/api/users", methods=["GET"])
-@jwt_required(fresh=False)
+@jwt_required()
 def getUsers():
     user_role = get_jwt_identity()['role']
     if user_role == 'ADMIN':
@@ -150,7 +170,7 @@ def getUsers():
     return jsonify({'msg': 'Method not allowed'}), 403
 
 @app.route("/api/users/<id>", methods=["DELETE"])
-@jwt_required(fresh=False)
+@jwt_required()
 def deleteUser(id):
     user_role = get_jwt_identity()['role']
     if user_role == 'ADMIN':
@@ -160,7 +180,7 @@ def deleteUser(id):
     return jsonify({'msg': 'Method not allowed'}), 403
 
 @app.route("/api/users/<id>", methods=["PUT"])
-@jwt_required(fresh=False)
+@jwt_required()
 def updateUserRole(id):
     user_role = get_jwt_identity()['role']
     if user_role == 'ADMIN':
