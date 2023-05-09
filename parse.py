@@ -71,7 +71,7 @@ def devbyParse():
 
         vacancy['Cкилы'] = driver.find_element(By.CLASS_NAME, 'vacancy__tags').text.split('\n')
 
-        vacancy['Описание'] = driver.find_element(By.CLASS_NAME, 'vacancy__text').get_attribute('innerHTML')
+        vacancy['Описание'] = driver.find_element(By.CLASS_NAME, 'vacancy__text').text
 
         vacancy['Компания'] = driver.find_element(By.CLASS_NAME, 'vacancy__header__company-name').text
 
@@ -83,19 +83,22 @@ def devbyParse():
             value = keyAndValue[1]
             vacancy[key] = value
 
-        setSalary(vacancy)
+        # setSalary(vacancy)
 
-        if 'Режим работы' not in vacancy:
-            vacancy['Режим работы'] = 'Не указан'
+        # if 'Режим работы' not in vacancy:
+        #     vacancy['Режим работы'] = 'Не указан'
+        #
+        # if 'Размер компании' not in vacancy:
+        #     vacancy['Размер компании'] = -1
+        #
+        # if 'Возможна удалённая работа' not in vacancy:
+        #     vacancy['Возможна удалённая работа'] = 'Не указано'
+        #
+        # if vacancy["Cкилы"][0] == '':
+        #     vacancy["Cкилы"] = ['Не требуются']
 
-        if 'Размер компании' not in vacancy:
-            vacancy['Размер компании'] = -1
-
-        if 'Возможна удалённая работа' not in vacancy:
-            vacancy['Возможна удалённая работа'] = 'Не указано'
-
-        if vacancy["Cкилы"][0] == '':
-            vacancy["Cкилы"] = ['Не требуются']
+        # + зарплата
+        # + размер команды
 
         for i in vacancy:
             if isinstance(vacancy[i], str):

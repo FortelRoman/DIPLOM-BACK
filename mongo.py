@@ -71,3 +71,7 @@ def updateUserName(id, username):
 def updateUserLogin(id, login):
     return usersCollection.update_one({'_id': id},
                                {"$set": {"login": login}}).modified_count
+
+def updateUserPassword(id, password):
+    return usersCollection.update_one({'_id': id},
+                               {"$set": {"password": password}}).modified_count;

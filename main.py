@@ -1,6 +1,6 @@
 from flask_restful import Api, Resource
 from parse import devbyParse
-from mongo import addItem, getList, deleteItem, getItem, findUserById, findUserByLogin, addUser, getAllUsers, deleteUserDB, updateUserRoleDB, updateUserName, updateUserLogin
+from mongo import addItem, getList, deleteItem, getItem, findUserById, findUserByLogin, updateUserPassword, addUser, getAllUsers, deleteUserDB, updateUserRoleDB, updateUserName, updateUserLogin
 from datetime import date
 import hashlib
 from datetime import datetime
@@ -14,7 +14,7 @@ from flask_cors import CORS, cross_origin
 # pip install flask flask_restful flask_cors pymongo selenium
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, methods=['GET', 'PUT', 'POST'])
+CORS(app, supports_credentials=True)
 app.config["JWT_COOKIE_SECURE"] = False
 app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
 app.config['JWT_SECRET_KEY'] = 'Your_Secret_Key'
@@ -93,13 +93,21 @@ def updateProfile():
     if user_from_db:
         if 'username' in params:
             updateUserName(current_user['id'], params['username'])
+            return jsonify({'msg': 'success'}), 200
         if 'login' in params:
             doc = findUserByLogin(params["login"])
             if not doc:
                 updateUserLogin(current_user['id'], params['login'])
-                return jsonify({'msg': 'success'}), 201
+                return jsonify({'msg': 'success'}), 200
             else:
                 return jsonify({'msg': 'Пользователь с таким логином уже существует'}), 409
+        if 'oldPassword' in params:
+            encrpted_password = hashlib.sha256(params['oldPassword'].encode("utf-8")).hexdigest()
+            if encrpted_password == user_from_db['password']:
+                password = hashlib.sha256(params['password'].encode("utf-8")).hexdigest()
+                updateUserPassword(current_user['id'], password)
+                return jsonify({'msg': 'success'}), 200
+            return jsonify({'msg': 'Старый пароль неверный'}), 400
     else:
         return jsonify({'msg': 'Profile not found'}), 404
 
