@@ -41,7 +41,7 @@ def addItem(addDate, data):
 
 
 def getList():
-    return collection.find()
+    return collection.find().sort('date', -1)
 
 
 def deleteItem(id):

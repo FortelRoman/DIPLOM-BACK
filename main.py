@@ -47,10 +47,9 @@ def register():
     doc = findUserByLogin(new_user["login"])
     if not doc:
         addUser(username, login, password, role)
-        return jsonify({'msg': 'User created successfully'}), 201
+        return jsonify({'msg': 'Пользователь зарегистрирован успешно'}), 201
     else:
-        return jsonify({'msg': 'Login already exists'}), 409
-
+        return jsonify({'msg': 'Такой логин уже существует в системе'}), 409
 
 @app.route("/api/auth/login", methods=["POST"])
 def login():
@@ -64,7 +63,7 @@ def login():
             set_access_cookies(response, access_token)
             return response, 200
 
-    return jsonify({'msg': 'The login or password is incorrect'}), 401
+    return jsonify({'msg': 'Логин или пароль неверный'}), 401
 
 @app.route("/api/auth/logout", methods=["POST"])
 def logout():
