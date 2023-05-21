@@ -1,6 +1,6 @@
 from flask_restful import Api, Resource
 from parse import devbyParse
-from mongo import addItem, getList, deleteItem, getItem, findUserById, findUserByLogin, updateUserPassword, addUser, getAllUsers, deleteUserDB, updateUserRoleDB, updateUserName, updateUserLogin
+from mongo import addItem, getList, deleteItem, getItem, findUserById, findUserByLogin, updateUserPassword, addUser, getAllUsers, getUsersInfo, deleteUserDB, updateUserRoleDB, updateUserName, updateUserLogin
 from datetime import date
 import hashlib
 from datetime import datetime
@@ -171,8 +171,11 @@ def parseResource():
 def getUsers():
     user_role = get_jwt_identity()['role']
     if user_role == 'ADMIN':
+        info = getUsersInfo()
         records = getAllUsers()
-        return jsonify([record for record in records])
+        info['users'] = [record for record in records]
+        info['totalCount'] = info['usersCount'] + info['analystCount'] + info['adminCount']
+        return jsonify(info)
 
     return jsonify({'msg': 'Method not allowed'}), 403
 

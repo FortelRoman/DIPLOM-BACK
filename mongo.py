@@ -2,7 +2,12 @@ from datetime import date
 from pymongo import MongoClient
 import uuid
 
-cluster = MongoClient('mongodb+srv://fortelra19:fortelra19@devby.4yo2tlq.mongodb.net/?retryWrites=true&w=majority')
+# cluster = MongoClient('mongodb+srv://fortelra19:fortelra19@devby.4yo2tlq.mongodb.net/?retryWrites=true&w=majority')
+# db = cluster['DB_DEVBY']
+# collection = db['COLLECTION_DEVBY']
+# usersCollection = db['COLLECTION_USERS']
+
+cluster = MongoClient('localhost', 27017)
 db = cluster['DB_DEVBY']
 collection = db['COLLECTION_DEVBY']
 usersCollection = db['COLLECTION_USERS']
@@ -55,6 +60,12 @@ def getItem(id):
 def getAllUsers():
     return usersCollection.find()
 
+def getUsersInfo():
+    return {
+        'usersCount': len(list(usersCollection.find({'role': "USER"}))),
+        'analystCount': len(list(usersCollection.find({'role': "ANALYST"}))),
+        'adminCount': len(list(usersCollection.find({'role': "ADMIN"}))),
+    }
 
 def deleteUserDB(id):
     return usersCollection.delete_one({'_id': id}).deleted_count
