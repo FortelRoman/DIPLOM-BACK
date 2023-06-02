@@ -1,6 +1,6 @@
 from flask_restful import Api, Resource
 from parse import devbyParse
-from mongo import addItem, getList, deleteItem, getItem, findUserById, findUserByLogin, updateUserPassword, addUser, getAllUsers, getUsersInfo, deleteUserDB, updateUserRoleDB, updateUserName, updateUserLogin
+from mongo import addItem, getList, deleteItem, getItem, findUserById, findUserByLogin, updateUserPassword, addUser, getAllUsers, getUsersInfo, deleteUserDB, updateUserRoleDB, updateUserName, updateUserLogin, deleteProfileBD
 from datetime import date
 import hashlib
 from datetime import datetime
@@ -81,6 +81,16 @@ def profile():
         return jsonify({'profile': user_from_db}), 200
     else:
         return jsonify({'msg': 'Profile not found'}), 404
+
+@app.route("/api/auth/profile", methods=["DELETE"])
+@jwt_required()
+def deleteProfile():
+    current_user = get_jwt_identity()
+    if deleteProfileBD(current_user['id']) > 0:
+        response = jsonify({"msg": "delete successful"})
+        unset_jwt_cookies(response)
+        return response
+    return jsonify({'msg': 'Error'}), 400
 
 @app.route("/api/profile", methods=["PUT"])
 @jwt_required()

@@ -1,16 +1,34 @@
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
-from selenium.webdriver.edge.options import Options
+from selenium.webdriver.chrome.options import Options
 
 def devbyParse():
     path = 'https://jobs.devby.io/'
+    DRIVER_PATH = './chromedriver.exe'
 
     options = Options()
     options.headless = True
     options.add_argument("--window-size=1920,1200")
-    driver = webdriver.Chrome(options=options)
+
+    # options.add_argument("--disable-blink-features=AutomationControlled")
+    # options.add_experimental_option("useAutomationExtension", False)
+    # options.add_experimental_option("excludeSwitches", ["enable-automation"])
+
+    service = Service(executable_path=DRIVER_PATH)
+    driver = webdriver.Chrome(service=service, options=options)
+    # driver = webdriver.Chrome(options=options, dri)
+    # driver = uc.Chrome(version_main = 112)
+    # driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
+    #     'source': '''
+    #         delete window.cdc_adoQpoasnfa76pfcZLmcfl_Array;
+    #         delete window.cdc_adoQpoasnfa76pfcZLmcfl_Promise;
+    #         delete window.cdc_adoQpoasnfa76pfcZLmcfl_Symbol;
+    #     '''
+    # })
+
     driver.get(path)
 
     button = WebDriverWait(driver, 100).until(EC.element_to_be_clickable((By.CLASS_NAME, "wishes-popup__button-close")))
@@ -58,8 +76,8 @@ def devbyParse():
 
         vacanciesArray.append(vacancy)
 
-        # print(str(index + 1) + '/' + str(len(vacanciesLinks)) + '    ' + str(
-        #     round((index + 1) / len(vacanciesLinks), 3) * 100) + ' %')
+        print(str(index + 1) + '/' + str(len(vacanciesLinks)) + '    ' + str(
+            round((index + 1) / len(vacanciesLinks), 3) * 100) + ' %')
 
     driver.quit()
 

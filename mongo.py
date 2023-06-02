@@ -2,12 +2,12 @@ from datetime import date
 from pymongo import MongoClient
 import uuid
 
-# cluster = MongoClient('mongodb+srv://fortelra19:fortelra19@devby.4yo2tlq.mongodb.net/?retryWrites=true&w=majority')
+cluster = MongoClient('mongodb+srv://fortelra19:fortelra19@devby.4yo2tlq.mongodb.net/?retryWrites=true&w=majority')
 # db = cluster['DB_DEVBY']
 # collection = db['COLLECTION_DEVBY']
 # usersCollection = db['COLLECTION_USERS']
 
-cluster = MongoClient('localhost', 27017)
+# cluster = MongoClient('localhost', 27017)
 db = cluster['DB_DEVBY']
 collection = db['COLLECTION_DEVBY']
 usersCollection = db['COLLECTION_USERS']
@@ -28,6 +28,10 @@ def addUser(username, login,  password, role):
         'role': role,
     })
 
+def deleteProfileBD(userId):
+    return usersCollection.delete_one({
+        '_id': userId,
+    }).deleted_count
 
 def addItem(addDate, data):
     if (addDate.count):
